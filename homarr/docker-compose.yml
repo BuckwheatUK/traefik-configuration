@@ -1,0 +1,31 @@
+#---------------------------------------------------------------------#
+#     Homarr - A simple, yet powerful dashboard for your server.     #
+#---------------------------------------------------------------------#
+services:
+  homarr:
+    container_name: homarr
+    image: ghcr.io/ajnart/homarr:latest
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # Optional, only if you want docker integration
+      - /home/USER/homarr/configs:/app/data/configs
+      - /home/USER/homarr/icons:/app/public/icons
+      - /home/USER/homarr/data:/data
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.homarr.entrypoints=http"
+      - "traefik.http.routers.homarr.rule=Host(`homarr.local.EXAMPLE.com`)"
+      - "traefik.http.middlewares.homarr-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.homarr.middlewares=homarr-https-redirect"
+      - "traefik.http.routers.homarr-secure.entrypoints=https"
+      - "traefik.http.routers.homarr-secure.rule=Host(`homarr.local.EXAMPLE.com`)"
+      - "traefik.http.routers.homarr-secure.tls=true"
+      - "traefik.http.routers.homarr-secure.service=homarr"
+      - "traefik.http.services.homarr.loadbalancer.server.port=7575"
+      - "traefik.docker.network=proxy"
+
+networks:
+  proxy:
+    external: true
